@@ -4,410 +4,318 @@ import exe.ex3.game.PacManAlgo;
 import exe.ex3.game.PacmanGame;
 
 import java.awt.Color;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
- * Ex3 - PacMan algorithm (client side).
+ * Ex3Algo
  *
- * Strategy (high level):
- * 1) If there are eatable ghosts -> chase nearest eatable ghost safely.
- * 2) Otherwise eat nearest safe pink dot.
- * 3) If threatened by ghosts -> prefer a green dot (power pellet).
- * 4) Always avoid dangerous cells near non-eatable ghosts.
- *
- * Implementation uses BFS each move.
+ * Automatic Pac-Man algorithm.
+ * The algorithm decides the next move using BFS distance maps.
+ * It balances between survival (running away from ghosts)
+ * and scoring (eating dots and eatable ghosts).
  */
 public class Ex3Algo implements PacManAlgo {
 
-    private int _count;
+    private static final int CODE = 0;
 
-    // Cached color-int codes (computed once)
-    private boolean _init = false;
-    private int PINK, BLACK, GREEN;
+    // Current game objects (updated every step)
+    private GhostCL[] gs;
+    private Map world;
 
-    // Tunables
-    private static final int DANGER_RADIUS_NEAR = 2;
-    private static final int DANGER_RADIUS_FAR  = 3;
-    private static final int TRIGGER_GREEN_IF_GHOST_WITHIN = 4;
-    private static final int MAX_BFS = 20_000; // safety cap
+    // Counters and chosen direction
+    private int stepCount = 0;
+    private int chosenDir = Game.UP;
 
-    public Ex3Algo() { _count = 0; }
+    // Cached paths to avoid recomputing BFS every step
+    private Pixel2D[] pathToDots;
+    private Pixel2D[] pathToGhost;
+    private int pathIdx = 2;
 
+    // Color codes used by the game board
+    private final int OBS = Game.getIntColor(Color.BLUE, CODE);
+    private final int DOT = Game.getIntColor(Color.PINK, CODE);
+
+    // Direction constants (as provided by the game engine)
+    private final int U = Game.UP, L = Game.LEFT, D = Game.DOWN, R = Game.RIGHT;
+
+    /**
+     * Returns a short description of the algorithm.
+     * This text is shown by the game engine and used for debugging.
+     */
     @Override
     public String getInfo() {
-        return "BFS PacMan: avoid non-eatable ghosts (danger map), eat pink dots, "
-                + "use green pellets when threatened, and chase eatable ghosts during power mode.";
+        return "Automatic Pac-Man algorithm using BFS distances. "
+                + "Runs away from nearby ghosts, eats pink dots when safe, "
+                + "and chases ghosts when they are eatable.";
     }
 
+    /**
+     * Main decision function of the algorithm.
+     * This method is called once every game tick.
+     *
+     * The function analyzes:
+     * - Ghost positions and states
+     * - Distances from ghosts
+     * - Available dots on the board
+     *
+     * Based on this data, it chooses the best direction to move.
+     */
     @Override
     public int move(PacmanGame game) {
-        final int code = 0;
-        _count++;
 
-        int[][] board = game.getGame(code);
-        if (board == null || board.length == 0 || board[0].length == 0) return Game.UP;
+        gs = game.getGhosts(CODE);
+        world = new Map(game.getGame(CODE));
 
-        initColorsOnce(code);
+        Pixel2D pac = pacPos(game);
+        Map danger = new Map(world.getWidth(), world.getHeight(), 0);
 
-        P pac = asP(game.getPos(code));
-        if (pac == null) return Game.UP;
+        boolean chase = false;
+        boolean ignoreGhosts = false;
 
-        GhostCL[] ghosts = game.getGhosts(code);
-        if (ghosts == null) ghosts = new GhostCL[0];
+        // Analyze ghost positions and build danger map
+        if (gs != null && gs.length > 0) {
 
-        // Optional debug prints
-        if (_count == 1 || _count == 300) {
-            printBoard(board);
-            System.out.println("Pacman coordinate: " + game.getPos(code));
-            printGhosts(ghosts);
-        }
+            // If ghosts are eatable, Pac-Man plays aggressively
+            if (gs[0].remainTimeAsEatable(CODE) > 0) {
+                ignoreGhosts = true;
+                chase = true;
+                chosenDir = goDots(pac, danger, ignoreGhosts);
+            } else {
 
-        boolean[][] passable = buildPassable(board);
-        int[][] distToNonEatableGhost = multiSourceBfsDistances(board, passable, ghosts, true);
+                // Build distance maps from each ghost
+                for (int i = 0; i < gs.length; i++) {
+                    Pixel2D gPos = ghostPos(i);
+                    Map2D dMap = world.allDistance(gPos, OBS);
+                    if (dMap == null) continue;
 
-        // 1) Chase nearest eatable ghost (safe)
-        P nextToEatable = nextStepToNearestEatableGhost(board, passable, distToNonEatableGhost, pac, ghosts);
-        if (nextToEatable != null && !(nextToEatable.x == pac.x && nextToEatable.y == pac.y)) {
-            return dirFromTo(pac, nextToEatable);
-        }
+                    int dp = dMap.getPixel(pac);
 
-        // 2) If threatened -> try go to GREEN
-        int minGhostDist = distAt(distToNonEatableGhost, pac);
-        boolean threatened = (minGhostDist >= 0 && minGhostDist <= TRIGGER_GREEN_IF_GHOST_WITHIN);
+                    // Ghost is close enough to be dangerous
+                    if (dp < 4 && dp > 0) {
 
-        if (threatened) {
-            P nextToGreen = bfsNextStep(board, passable, distToNonEatableGhost, pac,
-                    (x, y) -> board[x][y] == GREEN,
-                    true);
-            if (nextToGreen != null && !(nextToGreen.x == pac.x && nextToGreen.y == pac.y)) {
-                return dirFromTo(pac, nextToGreen);
-            }
-        }
+                        // Ghost can be eaten
+                        if (gs[i].remainTimeAsEatable(CODE) > 0) {
+                            if (dp < 3) {
+                                int tmp = goGreen(gPos, pac);
+                                if (tmp != -5) {
+                                    chosenDir = tmp;
+                                    chase = true;
+                                }
+                            }
+                            ignoreGhosts = true;
+                        }
 
-        // 3) Go to nearest safe PINK dot
-        P nextToPink = bfsNextStep(board, passable, distToNonEatableGhost, pac,
-                (x, y) -> board[x][y] == PINK,
-                true);
-        if (nextToPink != null && !(nextToPink.x == pac.x && nextToPink.y == pac.y)) {
-            return dirFromTo(pac, nextToPink);
-        }
+                        if (chase || ignoreGhosts) break;
 
-        // 4) Escape fallback: maximize distance from ghosts
-        int bestDir = bestEscapeDir(board, passable, distToNonEatableGhost, pac);
-        if (bestDir != Integer.MIN_VALUE) return bestDir;
-
-        // 5) Final fallback
-        return randomDir();
-    }
-
-    /* ----------------------------- Init & maps ----------------------------- */
-
-    private void initColorsOnce(int code) {
-        if (_init) return;
-        PINK  = Game.getIntColor(Color.PINK, code);
-        BLACK = Game.getIntColor(Color.BLACK, code);
-        GREEN = Game.getIntColor(Color.GREEN, code);
-        _init = true;
-    }
-
-    private boolean[][] buildPassable(int[][] board) {
-        int w = board.length;
-        int h = board[0].length;
-        boolean[][] pass = new boolean[w][h];
-        for (int x = 0; x < w; x++) {
-            for (int y = 0; y < h; y++) {
-                pass[x][y] = (board[x][y] != BLACK);
-            }
-        }
-        return pass;
-    }
-
-    /* ----------------------------- Targets ----------------------------- */
-
-    private P nextStepToNearestEatableGhost(int[][] board,
-                                            boolean[][] passable,
-                                            int[][] distToNonEatableGhost,
-                                            P pac,
-                                            GhostCL[] ghosts) {
-
-        boolean[][] target = new boolean[board.length][board[0].length];
-        boolean found = false;
-
-        for (GhostCL g : ghosts) {
-            if (g == null) continue;
-            if (safeRemainEatable(g, 0) > 0) {
-                P gp = asP(g.getPos(0));
-                if (gp != null && inBounds(board, gp.x, gp.y)) {
-                    target[gp.x][gp.y] = true;
-                    found = true;
+                        // Merge this ghost's distance map into the global danger map
+                        mergeMin(danger, dMap);
+                    }
                 }
             }
         }
-        if (!found) return null;
 
-        return bfsNextStep(board, passable, distToNonEatableGhost, pac,
-                (x, y) -> target[x][y],
-                true);
+        // Final decision: escape or collect dots
+        if (!chase && !ignoreGhosts && danger.getPixel(pac) < 4 && danger.getPixel(pac) > 0) {
+            chosenDir = flee(pac, danger);
+        } else if (!chase) {
+            chosenDir = goDots(pac, danger, ignoreGhosts);
+        }
+
+        stepCount++;
+        return chosenDir;
     }
 
-    /* ----------------------------- BFS ----------------------------- */
+    /**
+     * Moves Pac-Man toward the nearest pink dot.
+     *
+     * If a cached path exists, the algorithm continues on it.
+     * Otherwise, it performs BFS to find the closest dot
+     * and moves one step in that direction.
+     */
+    private int goDots(Pixel2D pac, Map danger, boolean ignore) {
 
-    @FunctionalInterface
-    private interface CellPredicate {
-        boolean test(int x, int y);
-    }
+        Map tmp = new Map(world.getMap());
 
-    private P bfsNextStep(int[][] board,
-                          boolean[][] passable,
-                          int[][] distToNonEatableGhost,
-                          P start,
-                          CellPredicate isTarget,
-                          boolean avoidDanger) {
+        Pixel2D cached = nextFromCachedPath(pac);
+        if (cached != null) return dir(cached, pac);
 
-        int w = board.length;
-        int h = board[0].length;
-
-        if (isTarget.test(start.x, start.y)) return start;
-
-        P[][] prev = new P[w][h];
-        boolean[][] visited = new boolean[w][h];
-
-        ArrayDeque<P> q = new ArrayDeque<>();
-        q.add(new P(start.x, start.y));
-        visited[start.x][start.y] = true;
-
-        int explored = 0;
-
-        while (!q.isEmpty()) {
-            P cur = q.poll();
-            explored++;
-            if (explored > MAX_BFS) break;
-
-            if (!(cur.x == start.x && cur.y == start.y) && isTarget.test(cur.x, cur.y)) {
-                return reconstructNextStep(start, cur, prev);
-            }
-
-            for (P nb : neighbors(cur)) {
-                int nx = nb.x, ny = nb.y;
-                if (!inBounds(board, nx, ny)) continue;
-                if (visited[nx][ny]) continue;
-                if (!passable[nx][ny]) continue;
-
-                if (avoidDanger && isDangerous(distToNonEatableGhost, nx, ny, board)) continue;
-
-                visited[nx][ny] = true;
-                prev[nx][ny] = cur;
-                q.add(new P(nx, ny));
+        // Mark ghost positions as obstacles when needed
+        if (!ignore && gs != null) {
+            for (int i = 0; i < gs.length; i++) {
+                tmp.setPixel(ghostPos(i), OBS);
             }
         }
 
+        Map2D d2 = tmp.allDistance(pac, OBS);
+        if (!(d2 instanceof Map)) return flee(pac, danger);
+
+        Pixel2D target = closestByLayers((Map) d2, tmp, DOT, pac);
+        if (target != null) {
+            pathToDots = tmp.shortestPath(pac, target, OBS);
+            pathIdx = 2;
+            if (pathToDots != null && pathToDots.length > 1) {
+                return dir(pathToDots[1], pac);
+            }
+        }
+        return flee(pac, danger);
+    }
+
+    /**
+     * Chases a ghost that is currently eatable.
+     *
+     * A shortest path is calculated to the ghost position.
+     * Pac-Man moves one step along that path.
+     */
+    private int goGreen(Pixel2D ghost, Pixel2D pac) {
+        pathToGhost = world.shortestPath(pac, ghost, OBS);
+        if (pathToGhost != null && pathToGhost.length > 2) {
+            return dir(pathToGhost[1], pac);
+        }
+        return -5;
+    }
+
+    /**
+     * Escape behavior.
+     *
+     * Pac-Man chooses the neighboring cell
+     * with the largest distance from ghosts.
+     */
+    private int flee(Pixel2D pac, Map danger) {
+        return dir(bestNeighbor(danger, pac), pac);
+    }
+
+    /**
+     * Finds the safest neighboring cell.
+     *
+     * The safest cell is defined as the neighbor
+     * with the maximum value in the danger map.
+     */
+    private Pixel2D bestNeighbor(Map danger, Pixel2D pac) {
+        int w = danger.getWidth(), h = danger.getHeight();
+        int x = pac.getX(), y = pac.getY();
+
+        Pixel2D best = pac;
+        int bestVal = danger.getPixel(pac);
+
+        Pixel2D[] ns = {
+                new Index2D((x + 1) % w, y),
+                new Index2D((x - 1 + w) % w, y),
+                new Index2D(x, (y + 1) % h),
+                new Index2D(x, (y - 1 + h) % h)
+        };
+
+        for (Pixel2D p : ns) {
+            int v = danger.getPixel(p);
+            if (v >= bestVal) {
+                bestVal = v;
+                best = p;
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Merges ghost distance maps.
+     *
+     * For each cell, the minimal distance to any ghost is kept.
+     * This creates a combined danger map.
+     */
+    private void mergeMin(Map acc, Map2D oneGhost) {
+        int w = acc.getWidth(), h = acc.getHeight();
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                int d = oneGhost.getPixel(new Index2D(x, y));
+                if (d <= 0 || d == OBS) continue;
+                int cur = acc.getPixel(x, y);
+                if (cur == 0 || d < cur) acc.setPixel(x, y, d);
+            }
+        }
+    }
+
+    /**
+     * Finds the closest target using BFS layers.
+     *
+     * The search expands layer by layer until
+     * a cell with the required color is found.
+     */
+    private Pixel2D closestByLayers(Map dist, Map real, int color, Pixel2D start) {
+        int w = dist.getWidth(), h = dist.getHeight();
+        boolean cyc = world.isCyclic();
+
+        Queue<Pixel2D> q = new LinkedList<>();
+        q.add(start);
+
+        while (!q.isEmpty()) {
+            Pixel2D c = q.poll();
+            int want = dist.getPixel(c) + 1;
+            int x = c.getX(), y = c.getY();
+
+            Pixel2D[] ns = {
+                    new Index2D((x + 1) % w, y),
+                    new Index2D((x - 1 + w) % w, y),
+                    new Index2D(x, (y + 1) % h),
+                    new Index2D(x, (y - 1 + h) % h)
+            };
+
+            for (Pixel2D p : ns) {
+                if (dist.getPixel(p) == want) {
+                    if (real.getPixel(p) == color) return p;
+                    q.add(p);
+                }
+            }
+        }
         return null;
     }
 
-    private P reconstructNextStep(P start, P goal, P[][] prev) {
-        P cur = goal;
-        P p = prev[cur.x][cur.y];
-        if (p == null) return null;
-
-        while (p != null && !(p.x == start.x && p.y == start.y)) {
-            cur = p;
-            p = prev[cur.x][cur.y];
-        }
-        return cur;
-    }
-
-    /* ----------------------------- Danger logic ----------------------------- */
-
-    private boolean isDangerous(int[][] distToNonEatableGhost, int x, int y, int[][] board) {
-        if (distToNonEatableGhost == null) return false;
-        int d = distToNonEatableGhost[x][y];
-        if (d < 0) return false;
-
-        int radius = (isCorridor(board, x, y) ? DANGER_RADIUS_FAR : DANGER_RADIUS_NEAR);
-        return d <= radius;
-    }
-
-    private boolean isCorridor(int[][] board, int x, int y) {
-        int pass = 0;
-        for (P nb : neighbors(new P(x, y))) {
-            if (inBounds(board, nb.x, nb.y) && board[nb.x][nb.y] != BLACK) pass++;
-        }
-        return pass <= 2;
-    }
-
-    private int bestEscapeDir(int[][] board, boolean[][] passable, int[][] distToNonEatableGhost, P pac) {
-        int bestDir = Integer.MIN_VALUE;
-        int bestScore = Integer.MIN_VALUE;
-
-        int[] dirs = {Game.UP, Game.LEFT, Game.DOWN, Game.RIGHT};
-
-        for (int d : dirs) {
-            P np = step(pac, d);
-            if (!inBounds(board, np.x, np.y)) continue;
-            if (!passable[np.x][np.y]) continue;
-            if (isDangerous(distToNonEatableGhost, np.x, np.y, board)) continue;
-
-            int score = distAt(distToNonEatableGhost, np);
-            if (score > bestScore) {
-                bestScore = score;
-                bestDir = d;
+    /**
+     * Continues movement on a cached path.
+     *
+     * This reduces repeated BFS computations
+     * when Pac-Man is already moving toward a target.
+     */
+    private Pixel2D nextFromCachedPath(Pixel2D pac) {
+        if (pathToDots != null && pathIdx < pathToDots.length) {
+            if (pathToDots[pathIdx - 1].equals(pac)) {
+                return pathToDots[pathIdx++];
             }
         }
-
-        if (bestDir == Integer.MIN_VALUE) {
-            for (int d : dirs) {
-                P np = step(pac, d);
-                if (!inBounds(board, np.x, np.y)) continue;
-                if (!passable[np.x][np.y]) continue;
-
-                int score = distAt(distToNonEatableGhost, np);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestDir = d;
-                }
-            }
-        }
-
-        return bestDir;
+        pathIdx = 2;
+        pathToDots = null;
+        return null;
     }
 
-    /* ----------------------------- Ghost distance map ----------------------------- */
-
-    private int[][] multiSourceBfsDistances(int[][] board, boolean[][] passable, GhostCL[] ghosts, boolean onlyNonEatable) {
-        int w = board.length;
-        int h = board[0].length;
-        int[][] dist = new int[w][h];
-        for (int[] row : dist) Arrays.fill(row, -1);
-
-        ArrayDeque<P> q = new ArrayDeque<>();
-
-        for (GhostCL g : ghosts) {
-            if (g == null) continue;
-
-            boolean eatable = safeRemainEatable(g, 0) > 0;
-            if (onlyNonEatable && eatable) continue;
-
-            P gp = asP(g.getPos(0));
-            if (gp == null || !inBounds(board, gp.x, gp.y)) continue;
-
-            dist[gp.x][gp.y] = 0;
-            q.add(new P(gp.x, gp.y));
-        }
-
-        while (!q.isEmpty()) {
-            P cur = q.poll();
-            int cd = dist[cur.x][cur.y];
-
-            for (P nb : neighbors(cur)) {
-                int nx = nb.x, ny = nb.y;
-                if (!inBounds(board, nx, ny)) continue;
-                if (!passable[nx][ny]) continue;
-                if (dist[nx][ny] != -1) continue;
-
-                dist[nx][ny] = cd + 1;
-                q.add(new P(nx, ny));
-            }
-        }
-
-        return dist;
+    /**
+     * Parses the ghost position string.
+     */
+    private Pixel2D ghostPos(int i) {
+        String[] a = gs[i].getPos(CODE).split(",");
+        return new Index2D(Integer.parseInt(a[0]), Integer.parseInt(a[1]));
     }
 
-    private int distAt(int[][] dist, P p) {
-        if (dist == null || p == null) return -1;
-        if (p.x < 0 || p.y < 0 || p.x >= dist.length || p.y >= dist[0].length) return -1;
-        return dist[p.x][p.y];
+    /**
+     * Parses Pac-Man position from the game object.
+     */
+    private Pixel2D pacPos(PacmanGame game) {
+        String[] a = game.getPos(CODE).split(",");
+        return new Index2D(Integer.parseInt(a[0]), Integer.parseInt(a[1]));
     }
 
-    private int safeRemainEatable(GhostCL g, int code) {
-        try {
-            return (int) g.remainTimeAsEatable(code);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
+    /**
+     * Converts two adjacent cells into a direction constant.
+     *
+     * Supports cyclic wrapping at the borders of the map.
+     */
+    private int dir(Pixel2D next, Pixel2D cur) {
+        int cx = cur.getX(), cy = cur.getY();
+        int nx = next.getX(), ny = next.getY();
+        int w = world.getWidth(), h = world.getHeight();
 
+        if ((cx + 1) % w == nx) return R;
+        if ((cx - 1 + w) % w == nx) return L;
+        if ((cy + 1) % h == ny) return U;
+        if ((cy - 1 + h) % h == ny) return D;
 
-    /* ----------------------------- Geometry & directions ----------------------------- */
-
-    private static class P {
-        final int x, y;
-        P(int x, int y) { this.x = x; this.y = y; }
-    }
-
-    private static P[] neighbors(P p) {
-        return new P[] {
-                new P(p.x, p.y - 1),
-                new P(p.x - 1, p.y),
-                new P(p.x, p.y + 1),
-                new P(p.x + 1, p.y)
-        };
-    }
-
-    private static P step(P p, int dir) {
-        if (dir == Game.UP) return new P(p.x, p.y - 1);
-        if (dir == Game.DOWN) return new P(p.x, p.y + 1);
-        if (dir == Game.LEFT) return new P(p.x - 1, p.y);
-        if (dir == Game.RIGHT) return new P(p.x + 1, p.y);
-        return new P(p.x, p.y);
-    }
-
-    private static int dirFromTo(P from, P to) {
-        if (to.x == from.x && to.y == from.y - 1) return Game.UP;
-        if (to.x == from.x && to.y == from.y + 1) return Game.DOWN;
-        if (to.x == from.x - 1 && to.y == from.y) return Game.LEFT;
-        if (to.x == from.x + 1 && to.y == from.y) return Game.RIGHT;
         return Game.UP;
-    }
-
-    private static boolean inBounds(int[][] board, int x, int y) {
-        return x >= 0 && y >= 0 && x < board.length && y < board[0].length;
-    }
-
-    /* ----------------------------- Robust pos parsing ----------------------------- */
-
-    private static P asP(Object posObj) {
-        if (posObj == null) return null;
-        int[] xy = extractTwoInts(posObj.toString());
-        return (xy == null) ? null : new P(xy[0], xy[1]);
-    }
-
-    private static int[] extractTwoInts(String s) {
-        if (s == null) return null;
-        Matcher m = Pattern.compile("-?\\d+").matcher(s);
-        int[] out = new int[2];
-        int i = 0;
-        while (m.find() && i < 2) out[i++] = Integer.parseInt(m.group());
-        return (i == 2) ? out : null;
-    }
-
-    /* ----------------------------- Debug helpers ----------------------------- */
-
-    private static void printBoard(int[][] b) {
-        for (int y = 0; y < b[0].length; y++) {
-            for (int x = 0; x < b.length; x++) {
-                int v = b[x][y];
-                System.out.print(v + "\t");
-            }
-            System.out.println();
-        }
-    }
-
-    private static void printGhosts(GhostCL[] gs) {
-        for (int i = 0; i < gs.length; i++) {
-            GhostCL g = gs[i];
-            System.out.println(i + ") status: " + g.getStatus()
-                    + ",  type: " + g.getType()
-                    + ",  pos: " + g.getPos(0)
-                    + ",  time: " + g.remainTimeAsEatable(0));
-        }
-    }
-
-    private static int randomDir() {
-        int[] dirs = {Game.UP, Game.LEFT, Game.DOWN, Game.RIGHT};
-        int ind = (int) (Math.random() * dirs.length); // <-- important cast
-        return dirs[ind];
     }
 }

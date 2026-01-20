@@ -1,5 +1,4 @@
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Index2DTest {
@@ -51,7 +50,7 @@ public class Index2DTest {
     @Test
     void testDistanceNullThrows() {
         Index2D a = new Index2D(0, 0);
-        assertThrows(RuntimeException.class, () -> a.distance2D(null));
+        assertThrows(NullPointerException.class, () -> a.distance2D(null));
     }
 
     @Test
@@ -66,9 +65,18 @@ public class Index2DTest {
         Index2D b = new Index2D(1, 1);
         Index2D c = new Index2D(1, 2);
 
+        assertEquals(a, a);
         assertEquals(a, b);
         assertNotEquals(a, c);
         assertNotEquals(a, null);
         assertNotEquals(a, "not a pixel");
+    }
+
+    @Test
+    void testHashCodeConsistencyWithEquals() {
+        Index2D a = new Index2D(7, 9);
+        Index2D b = new Index2D(7, 9);
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
     }
 }

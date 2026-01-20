@@ -4,11 +4,13 @@ import java.util.Arrays;
 /**
  * This class represents a 2D map as a "screen" or a raster matrix or maze over integers.
  * @author boaz.benmoshe
- *
  */
 public class Map implements Map2D {
     private int[][] _map;
     private boolean _cyclicFlag = true;
+
+    // 4-neighbors directions: Up, Left, Down, Right
+    private static final int[][] DIRS = {{0,-1},{-1,0},{0,1},{1,0}};
 
     /**
      * Constructs a w*h 2D raster map with an init value v.
@@ -85,7 +87,7 @@ public class Map implements Map2D {
 
     @Override
     public int getPixel(Pixel2D p) {
-        return this.getPixel(p.getX(), p.getY());
+        return getPixel(p.getX(), p.getY());
     }
 
     @Override
@@ -130,9 +132,7 @@ public class Map implements Map2D {
             _map[x][y] = new_v;
             count++;
 
-            // 4-neighbors
-            int[][] dirs = {{0,-1},{-1,0},{0,1},{1,0}};
-            for (int[] d : dirs) {
+            for (int[] d : DIRS) {
                 int nx = x + d[0];
                 int ny = y + d[1];
 
@@ -141,7 +141,7 @@ public class Map implements Map2D {
                     ny = mod(ny, h);
                 }
 
-                if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+                if (!isInside(nx, ny)) continue;
                 if (vis[nx][ny]) continue;
                 if (_map[nx][ny] != old) continue;
 
@@ -182,8 +182,7 @@ public class Map implements Map2D {
             int x = cur.getX();
             int y = cur.getY();
 
-            int[][] dirs = {{0,-1},{-1,0},{0,1},{1,0}};
-            for (int[] d : dirs) {
+            for (int[] d : DIRS) {
                 int nx = x + d[0];
                 int ny = y + d[1];
 
@@ -192,7 +191,7 @@ public class Map implements Map2D {
                     ny = mod(ny, h);
                 }
 
-                if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+                if (!isInside(nx, ny)) continue;
                 if (vis[nx][ny]) continue;
                 if (_map[nx][ny] == obsColor) continue;
 
@@ -211,14 +210,13 @@ public class Map implements Map2D {
     }
 
     private Pixel2D[] buildPath(Index2D[][] prev, int sx, int sy, int tx, int ty) {
-        // reconstruct backwards
         ArrayDeque<Pixel2D> stack = new ArrayDeque<>();
         int cx = tx, cy = ty;
         stack.push(new Index2D(cx, cy));
 
         while (!(cx == sx && cy == sy)) {
             Index2D p = prev[cx][cy];
-            if (p == null) return null; // safety
+            if (p == null) return null;
             cx = p.getX();
             cy = p.getY();
             stack.push(new Index2D(cx, cy));
@@ -235,7 +233,13 @@ public class Map implements Map2D {
     @Override
     public boolean isInside(Pixel2D p) {
         if (p == null) return false;
-        int x = p.getX(), y = p.getY();
+        return isInside(p.getX(), p.getY());
+    }
+
+    /**
+     * Helper method (NOT part of Map2D in some versions) - therefore no @Override.
+     */
+    public boolean isInside(int x, int y) {
         return x >= 0 && y >= 0 && x < getWidth() && y < getHeight();
     }
 
@@ -263,7 +267,7 @@ public class Map implements Map2D {
         int[][] dist = new int[w][h];
         for (int x = 0; x < w; x++) Arrays.fill(dist[x], -1);
 
-        // keep obstacles as obsColor in the output (as requested in many versions)
+        // keep obstacles as obsColor in the output
         for (int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
                 if (_map[x][y] == obsColor) dist[x][y] = obsColor;
@@ -282,8 +286,7 @@ public class Map implements Map2D {
             int x = cur.getX(), y = cur.getY();
             int cd = dist[x][y];
 
-            int[][] dirs = {{0,-1},{-1,0},{0,1},{1,0}};
-            for (int[] d : dirs) {
+            for (int[] d : DIRS) {
                 int nx = x + d[0];
                 int ny = y + d[1];
 
@@ -292,9 +295,9 @@ public class Map implements Map2D {
                     ny = mod(ny, h);
                 }
 
-                if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+                if (!isInside(nx, ny)) continue;
                 if (_map[nx][ny] == obsColor) continue;
-                if (dist[nx][ny] != -1 && dist[nx][ny] != obsColor) continue;
+                if (dist[nx][ny] != -1) continue;
 
                 dist[nx][ny] = cd + 1;
                 q.add(new Index2D(nx, ny));

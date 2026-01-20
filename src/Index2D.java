@@ -35,11 +35,14 @@ public class Index2D implements Pixel2D {
 
     @Override
     public boolean equals(Object t) {
-        boolean ans = false;
-        if (t instanceof Pixel2D) {
-            Pixel2D p = (Pixel2D) t;
-            ans = (this.distance2D(p) == 0);
-        }
-        return ans;
+        if (this == t) return true;
+        if (!(t instanceof Pixel2D)) return false;
+        Pixel2D p = (Pixel2D) t;
+        return this._x == p.getX() && this._y == p.getY();
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * _x + _y;
     }
 }
