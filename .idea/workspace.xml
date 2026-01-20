@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a95c64c0-1917-47d3-a999-05f704f81230" name="Changes" comment="first//">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ex3AlgoTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ex3AlgoTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="a95c64c0-1917-47d3-a999-05f704f81230" name="Changes" comment="first//" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -267,7 +264,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768944548797</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="first//">
+      <option name="closed" value="true" />
+      <created>1768944830157</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1768944830157</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
