@@ -109,6 +109,7 @@ This helps Pac-Man survive even with multiple ghosts.
 
 ---
 
-🎬 Gameplay (Level 4 – autonomous Pac-Man):  
-https://www.youtube.com/shorts/R7GG4azvq5Y
+## 🎬 GAMEPLAY
 
+1. Link (Level 4 – autonomous Pac-Man):
+https://www.youtube.com/shorts/R7GG4azvq5Y
