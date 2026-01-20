@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a95c64c0-1917-47d3-a999-05f704f81230" name="Changes" comment="first">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/I2CS_Ex3.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/I2CS_Ex3.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/src/Ex3Algo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/src/Ex3Main.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/src/GameInfo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/src/Index2D.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/src/ManualAlgo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/src/Map.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/src/Map2D.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/src/Pixel2D.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/I2CS_Ex3/MapTest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MapTest.java" beforeDir="false" />
-    </list>
+    <list default="true" id="a95c64c0-1917-47d3-a999-05f704f81230" name="Changes" comment="first" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -140,7 +126,23 @@
       <option name="project" value="LOCAL" />
       <updated>1768927188816</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="first">
+      <option name="closed" value="true" />
+      <created>1768928904783</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1768928904783</updated>
+    </task>
+    <task id="LOCAL-00005" summary="first">
+      <option name="closed" value="true" />
+      <created>1768928912219</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1768928912219</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
