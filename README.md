@@ -109,5 +109,4 @@ This helps Pac-Man survive even with multiple ghosts.
 
 ---
 
-🎬 Gameplay video (Level 4):  
-[Download / view the MP4 (raw)](../../raw/main/assets/pacman_level4_demo.mp4)
+[Watch the full video](https://raw.githubusercontent.com/<USERNAME>/<REPO>/<BRANCH>/assets/pacman_level4_demo.mp4)
