@@ -4,36 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Minimal server-side game state:
- * - board (WALL/EMPTY/DOT/POWER) loaded from LevelLoader
- * - pacman position + score
- * - ghosts positions (simple)
- * - power mode timer
- *
- * Coordinates: board[x][y] (x first) just like your Map.
- * y=0 is top row (same as PNG reading).
- */
 public class MyPacmanGame {
 
-    // Cell codes (same as LevelLoader)
-    public static final int EMPTY = LevelLoader.EMPTY;
-    public static final int WALL  = LevelLoader.WALL;
-    public static final int DOT   = LevelLoader.DOT;
-    public static final int POWER = LevelLoader.POWER;
+    public static final int EMPTY = LevelLoaderEx3.EMPTY;
+    public static final int WALL  = LevelLoaderEx3.WALL;
+    public static final int DOT   = LevelLoaderEx3.DOT;
+    public static final int POWER = LevelLoaderEx3.POWER;
 
-    // Simple directions (match your Ex3Algo style: UP, LEFT, DOWN, RIGHT)
     public static final int UP = 0, LEFT = 1, DOWN = 2, RIGHT = 3;
 
-    // Game state
-    private final int[][] board;      // changes: DOT/POWER get eaten -> EMPTY
+    private final int[][] board;
     private final int w, h;
 
     private int pacX, pacY;
     private int score;
 
     private final List<Ghost> ghosts = new ArrayList<>();
-    private int powerTicks;           // >0 => ghosts are eatable
+    private int powerTicks;
 
     private final Random rnd = new Random(1);
 
@@ -45,18 +32,14 @@ public class MyPacmanGame {
         this.h = loadedBoard[0].length;
         this.board = deepCopy(loadedBoard);
 
-        // pick a start cell for pacman: first EMPTY/DOT/POWER found
         int[] p = findFirstWalkable();
         this.pacX = p[0];
         this.pacY = p[1];
         this.score = 0;
         this.powerTicks = 0;
 
-        // spawn a few ghosts on walkable cells (away from pacman if possible)
         spawnGhosts(3);
     }
-
-    /* -------------------- Public getters -------------------- */
 
     public int[][] getBoard() {
         return deepCopy(board);
@@ -72,7 +55,7 @@ public class MyPacmanGame {
     public int getPowerTicks() { return powerTicks; }
 
     public List<Ghost> getGhosts() {
-        return ghosts; // return direct list (ok for internal), or copy if you prefer
+        return ghosts;
     }
 
     public int remainingDots() {
@@ -85,41 +68,18 @@ public class MyPacmanGame {
         return cnt;
     }
 
-    /* -------------------- Tick update -------------------- */
-
-    /**
-     * One game step:
-     * 1) move pacman by dir if possible
-     * 2) eat DOT/POWER
-     * 3) move ghosts (simple random chase)
-     * 4) resolve collisions
-     * 5) decay power timer
-     */
     public StepResult step(int pacDir) {
-        // 1) move pacman
         movePacman(pacDir);
-
-        // 2) eat
         eatAtPacman();
-
-        // 3) move ghosts
         moveGhosts();
-
-        // 4) collisions
         boolean died = resolveCollisions();
-
-        // 5) decay power
         if (powerTicks > 0) powerTicks--;
-
-        // win/lose
         if (died) return StepResult.LOSE;
         if (remainingDots() == 0) return StepResult.WIN;
         return StepResult.CONTINUE;
     }
 
     public enum StepResult { CONTINUE, WIN, LOSE }
-
-    /* -------------------- Movement -------------------- */
 
     private void movePacman(int dir) {
         int nx = pacX, ny = pacY;
@@ -141,13 +101,15 @@ public class MyPacmanGame {
         } else if (cell == POWER) {
             score += 50;
             board[pacX][pacY] = EMPTY;
-            powerTicks = 80; // ~80 ticks power (tune)
+            powerTicks = 80;
         }
     }
 
     private void moveGhosts() {
         for (Ghost g : ghosts) {
             int dir = chooseGhostDir(g);
+            if (dir == -1) continue;
+
             int nx = g.x, ny = g.y;
             if (dir == UP) ny--;
             else if (dir == DOWN) ny++;
@@ -161,12 +123,6 @@ public class MyPacmanGame {
         }
     }
 
-    /**
-     * Simple ghost AI:
-     * - If not eatable: try move towards pacman (greedy)
-     * - If eatable: try move away (greedy)
-     * Falls back to random valid move.
-     */
     private int chooseGhostDir(Ghost g) {
         boolean eatable = (powerTicks > 0);
 
@@ -174,6 +130,7 @@ public class MyPacmanGame {
         int bestScore = eatable ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
         int[] dirs = {UP, LEFT, DOWN, RIGHT};
+
         for (int d : dirs) {
             int nx = g.x, ny = g.y;
             if (d == UP) ny--;
@@ -185,29 +142,41 @@ public class MyPacmanGame {
 
             int dist = manhattan(nx, ny, pacX, pacY);
             if (!eatable) {
-                // chase => minimize dist
                 if (dist < bestScore) { bestScore = dist; bestDir = d; }
             } else {
-                // run => maximize dist
                 if (dist > bestScore) { bestScore = dist; bestDir = d; }
             }
         }
 
         if (bestDir != -1) return bestDir;
 
-        // random fallback
-        return dirs[rnd.nextInt(dirs.length)];
+        int[] legal = legalDirsFrom(g.x, g.y);
+        if (legal.length == 0) return -1;
+        return legal[rnd.nextInt(legal.length)];
+    }
+
+    private int[] legalDirsFrom(int x, int y) {
+        int[] tmp = new int[4];
+        int c = 0;
+
+        if (isWalkable(x, y - 1)) tmp[c++] = UP;
+        if (isWalkable(x - 1, y)) tmp[c++] = LEFT;
+        if (isWalkable(x, y + 1)) tmp[c++] = DOWN;
+        if (isWalkable(x + 1, y)) tmp[c++] = RIGHT;
+
+        int[] out = new int[c];
+        System.arraycopy(tmp, 0, out, 0, c);
+        return out;
     }
 
     private boolean resolveCollisions() {
         for (Ghost g : ghosts) {
             if (g.x == pacX && g.y == pacY) {
                 if (powerTicks > 0) {
-                    // eat ghost
                     score += 200;
                     respawnGhost(g);
                 } else {
-                    return true; // pacman dies
+                    return true;
                 }
             }
         }
@@ -220,8 +189,6 @@ public class MyPacmanGame {
         g.y = p[1];
         g.lastDir = -1;
     }
-
-    /* -------------------- Spawn helpers -------------------- */
 
     private void spawnGhosts(int k) {
         for (int i = 0; i < k; i++) {
@@ -268,8 +235,6 @@ public class MyPacmanGame {
         return b;
     }
 
-    /* -------------------- Ghost inner class -------------------- */
-
     public static class Ghost {
         public int x, y;
         public int lastDir = -1;
@@ -280,4 +245,3 @@ public class MyPacmanGame {
         }
     }
 }
-

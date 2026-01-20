@@ -1,4 +1,4 @@
-# Ex3 – Pac-Man Game (Client Side Algorithm)
+# Ex3 – Pac-Man Game 
 
 ## Overview
 This project implements an **automatic Pac-Man algorithm** as part of **Ex3** in the Introduction to Computer Science course.

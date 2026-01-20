@@ -110,7 +110,6 @@ public class MapTest {
 
         int changed = m.fill(new Index2D(0, 0), 9);
 
-        // Correct count is 9 (includes (0,1))
         assertEquals(9, changed);
 
         assertEquals(9, m.getPixel(0, 0));
