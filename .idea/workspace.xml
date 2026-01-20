@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a95c64c0-1917-47d3-a999-05f704f81230" name="Changes" comment="first//">
-      <change afterPath="$PROJECT_DIR$/src/Ex3AlgoTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/LevelLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/LevelLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/MyPacmanGame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/MyPacmanGame.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ex3AlgoTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ex3AlgoTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +79,7 @@
       <recent name="client" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.Ex3AlgoTest">
+  <component name="RunManager" selected="JUnit.MapTest">
     <configuration name="Ex3Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Ex3Main" />
       <module name="I2CS_Ex3" />
@@ -118,10 +116,10 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.Ex3AlgoTest" />
-        <item itemvalue="Application.Ex3Main" />
         <item itemvalue="JUnit.MapTest" />
         <item itemvalue="JUnit.Index2DTest" />
+        <item itemvalue="JUnit.Ex3AlgoTest" />
+        <item itemvalue="Application.Ex3Main" />
       </list>
     </recent_temporary>
   </component>
@@ -261,7 +259,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768941982066</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="first//">
+      <option name="closed" value="true" />
+      <created>1768944548797</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1768944548797</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

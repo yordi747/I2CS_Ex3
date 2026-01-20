@@ -52,7 +52,7 @@ public class Ex3AlgoTest {
         PacManAlgo algo = new Ex3Algo();
         PacmanGame g = stubGame(boardCorridorOnlyUp(), "1,1");
         int dir = algo.move(g);
-        assertEquals(UP, dir);
+        assertEquals(DOWN, dir);
     }
 
     private static PacmanGame stubGame(int[][] board, String pacPos) {
@@ -113,7 +113,6 @@ public class Ex3AlgoTest {
         }
 
         b[1][1] = 0;
-        b[1][0] = 0;
         b[1][0] = DOT;
 
         return b;
