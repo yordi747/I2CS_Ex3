@@ -106,3 +106,9 @@ This helps Pac-Man survive even with multiple ghosts.
 2. Make sure `GameInfo.java` uses:
    ```java
    public static final PacManAlgo ALGO = new Ex3Algo();
+
+---
+
+🎬 Gameplay video: Pac-Man autonomously completes Level 4 while avoiding ghosts, chasing eatable ghosts, and collecting all pink dots.  
+[Watch the full gameplay video](assets/pacman_level4_demo.mp4)
+
