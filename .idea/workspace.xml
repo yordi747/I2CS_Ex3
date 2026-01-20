@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a95c64c0-1917-47d3-a999-05f704f81230" name="Changes" comment="first">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/I2CS_Ex3.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/I2CS_Ex3.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src/Ex3Algo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src/Ex3Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src/GameInfo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src/Index2D.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src/ManualAlgo.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src/Map.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src/Map2D.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/src/Pixel2D.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/I2CS_Ex3/MapTest.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/MapTest.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;yordi747&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/yordi747/I2CS_Ex3.git&quot;,
+    &quot;accountId&quot;: &quot;107deb68-0d94-4a3a-a921-e895febb52b6&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="showPreview" value="true" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="38WfQnmVEso2MhJOQlbAccBItyI" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Ex3Main.executor": "Run",
+    "Downloaded.Files.Path.Enabled": "false",
+    "JUnit.Index2DTest.executor": "Run",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\User\IdeaProjects\I2CS_Ex3.0" />
+      <recent name="C:\Users\User\IdeaProjects\I2CS_Ex3.0\images" />
+      <recent name="C:\Users\User\IdeaProjects\I2CS_Ex3.0\libs" />
+      <recent name="C:\Users\User\IdeaProjects\I2CS_Ex3.0\src" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.Ex3Main">
+    <configuration name="Ex3Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Ex3Main" />
+      <module name="I2CS_Ex3" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Index2DTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="I2CS_Ex3" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="Index2DTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Ex3Main" />
+        <item itemvalue="JUnit.Index2DTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a95c64c0-1917-47d3-a999-05f704f81230" name="Changes" comment="" />
+      <created>1768920233942</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1768920233942</updated>
+    </task>
+    <task id="LOCAL-00001" summary="first">
+      <option name="closed" value="true" />
+      <created>1768927140828</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1768927140828</updated>
+    </task>
+    <task id="LOCAL-00002" summary="first">
+      <option name="closed" value="true" />
+      <created>1768927147214</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1768927147214</updated>
+    </task>
+    <task id="LOCAL-00003" summary="first">
+      <option name="closed" value="true" />
+      <created>1768927188816</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1768927188816</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="first" />
+    <option name="LAST_COMMIT_MESSAGE" value="first" />
+  </component>
+</project>
