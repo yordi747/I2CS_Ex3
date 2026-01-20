@@ -109,6 +109,5 @@ This helps Pac-Man survive even with multiple ghosts.
 
 ---
 
-🎬 Gameplay video: Pac-Man autonomously completes Level 4 while avoiding ghosts, chasing eatable ghosts, and collecting all pink dots.  
-[Watch the full gameplay video](assets/pacman_level4_demo.mp4)
-
+🎬 Gameplay video (Level 4):  
+[Download / view the MP4 (raw)](../../raw/main/assets/pacman_level4_demo.mp4)
